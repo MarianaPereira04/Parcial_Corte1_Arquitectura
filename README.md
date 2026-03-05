@@ -1,0 +1,1 @@
+# Parcial_Corte1_Arquitectura
