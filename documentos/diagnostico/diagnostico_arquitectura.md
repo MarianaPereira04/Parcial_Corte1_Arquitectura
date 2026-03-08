@@ -1,4 +1,4 @@
-# stack tecnológico actual — ERP Iglesia
+# Stack tecnológico actual — ERP Iglesia
 
 ## Resumen ejecutivo
 
