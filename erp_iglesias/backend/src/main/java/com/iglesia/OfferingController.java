@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class OfferingController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @PostMapping
-    public OfferingResponse create(@RequestBody OfferingRequest request) {
+    public OfferingResponse create(@Valid @RequestBody OfferingRequest request) {
         OfferingService.OfferingWithPayment result = offeringService.create(request.personId(), request.amount(), request.concept());
         return OfferingResponse.from(result.offering(), result.payment());
     }

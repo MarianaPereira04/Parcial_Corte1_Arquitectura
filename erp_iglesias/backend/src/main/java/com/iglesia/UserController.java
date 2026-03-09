@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import org.springframework.web.server.ResponseStatusException;
 import com.iglesia.service.UserService;
 
@@ -19,7 +20,7 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public UserResponse createClient(@RequestBody CreateUserRequest request) {
+    public UserResponse createClient(@Valid @RequestBody CreateUserRequest request) {
         AppUser user = userService.createClient(request.email(), request.password());
         return UserResponse.from(user);
     }

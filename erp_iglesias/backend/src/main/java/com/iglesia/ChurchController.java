@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import org.springframework.web.server.ResponseStatusException;
 import com.iglesia.service.ChurchService;
 
@@ -18,7 +19,7 @@ public class ChurchController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ChurchResponse create(@RequestBody ChurchRequest request) {
+    public ChurchResponse create(@Valid @RequestBody ChurchRequest request) {
         Church church = churchService.create(request.name(), request.address());
         return ChurchResponse.from(church);
     }

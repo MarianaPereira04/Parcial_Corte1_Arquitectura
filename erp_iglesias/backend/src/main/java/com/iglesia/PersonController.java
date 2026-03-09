@@ -1,6 +1,8 @@
 package com.iglesia;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +22,7 @@ public class PersonController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @PostMapping
-    public PersonResponse create(@RequestBody PersonRequest request) {
+    public PersonResponse create(@Valid @RequestBody PersonRequest request) {
         Person person = personService.create(request.firstName(), request.lastName(), request.document(), request.phone(), request.email());
         return PersonResponse.from(person);
     }
@@ -41,7 +43,7 @@ public class PersonController {
         @NotBlank String lastName,
         String document,
         String phone,
-        String email
+        @Email String email
     ) {}
 
     public record PersonResponse(

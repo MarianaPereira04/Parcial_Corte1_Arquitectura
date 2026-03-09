@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class CourseController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public CourseResponse create(@RequestBody CourseRequest request) {
+    public CourseResponse create(@Valid @RequestBody CourseRequest request) {
         Course course = courseService.create(request.name(), request.description(), request.price());
         return CourseResponse.from(course);
     }

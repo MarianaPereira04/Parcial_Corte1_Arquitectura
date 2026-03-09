@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class EnrollmentController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @PostMapping
-    public EnrollmentResponse create(@RequestBody EnrollmentRequest request) {
+    public EnrollmentResponse create(@Valid @RequestBody EnrollmentRequest request) {
         EnrollmentService.EnrollmentWithPayment result = enrollmentService.create(request.personId(), request.courseId());
         return EnrollmentResponse.from(result.enrollment(), result.payment());
     }
