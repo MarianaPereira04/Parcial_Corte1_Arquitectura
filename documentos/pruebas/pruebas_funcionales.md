@@ -21,7 +21,7 @@ Estos servicios encapsulan la lógica de negocio que previamente se encontraba e
 
 ### Controladores refactorizados
 
-````markdown
+
 # Pruebas funcionales — ADR-001
 
 **Implementación de la capa Service**
