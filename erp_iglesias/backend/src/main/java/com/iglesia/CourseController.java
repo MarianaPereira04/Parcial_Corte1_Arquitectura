@@ -9,47 +9,34 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
+import com.iglesia.service.CourseService;
 
 @RestController
 @RequestMapping("/api/courses")
 public class CourseController {
-    private final CourseRepository courseRepository;
-    private final ChurchRepository churchRepository;
+    private final CourseService courseService;
 
-    public CourseController(CourseRepository courseRepository, ChurchRepository churchRepository) {
-        this.courseRepository = courseRepository;
-        this.churchRepository = churchRepository;
+    public CourseController(CourseService courseService) {
+        this.courseService = courseService;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public CourseResponse create(@RequestBody CourseRequest request) {
-        Church church = requireChurch();
-        Course course = new Course();
-        course.setName(request.name());
-        course.setDescription(request.description());
-        course.setPrice(request.price());
-        course.setChurch(church);
-        courseRepository.save(course);
+        Course course = courseService.create(request.name(), request.description(), request.price());
         return CourseResponse.from(course);
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @GetMapping
     public List<CourseResponse> list() {
-        Church church = requireChurch();
-        return courseRepository.findAllByChurchId(church.getId())
+        return courseService.list()
             .stream()
             .map(CourseResponse::from)
             .toList();
     }
 
-    private Church requireChurch() {
-        return churchRepository.findAll()
-            .stream()
-            .findFirst()
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe registrar una iglesia primero"));
-    }
+    // requireChurch moved to CourseService
 
     public record CourseRequest(
         @NotBlank String name,

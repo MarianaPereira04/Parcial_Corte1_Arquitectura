@@ -9,77 +9,34 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
+import com.iglesia.service.OfferingService;
 
 @RestController
 @RequestMapping("/api/offerings")
 public class OfferingController {
-    private final OfferingRepository offeringRepository;
-    private final PersonRepository personRepository;
-    private final PaymentRepository paymentRepository;
-    private final ChurchRepository churchRepository;
+    private final OfferingService offeringService;
 
-    public OfferingController(OfferingRepository offeringRepository,
-                              PersonRepository personRepository,
-                              PaymentRepository paymentRepository,
-                              ChurchRepository churchRepository) {
-        this.offeringRepository = offeringRepository;
-        this.personRepository = personRepository;
-        this.paymentRepository = paymentRepository;
-        this.churchRepository = churchRepository;
+    public OfferingController(OfferingService offeringService) {
+        this.offeringService = offeringService;
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @PostMapping
     public OfferingResponse create(@RequestBody OfferingRequest request) {
-        Church church = requireChurch();
-        Person person = personRepository.findById(request.personId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Persona no encontrada"));
-
-        if (!person.getChurch().getId().equals(church.getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Persona no pertenece a la iglesia");
-        }
-
-        Offering offering = new Offering();
-        offering.setPerson(person);
-        offering.setAmount(request.amount());
-        offering.setConcept(request.concept());
-        offering.setStatus(OfferingStatus.PENDIENTE);
-        offeringRepository.save(offering);
-
-        Payment payment = new Payment();
-        payment.setType(PaymentType.OFRENDA);
-        payment.setAmount(request.amount());
-        payment.setReferenceId(offering.getId());
-        paymentRepository.save(payment);
-
-        offering.setPaymentId(payment.getId());
-        offeringRepository.save(offering);
-
-        return OfferingResponse.from(offering, payment);
+        OfferingService.OfferingWithPayment result = offeringService.create(request.personId(), request.amount(), request.concept());
+        return OfferingResponse.from(result.offering(), result.payment());
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @GetMapping
     public List<OfferingResponse> list() {
-        Church church = requireChurch();
-        return offeringRepository.findAllByPersonChurchId(church.getId())
+        return offeringService.list()
             .stream()
-            .map(offering -> {
-                Payment payment = null;
-                if (offering.getPaymentId() != null) {
-                    payment = paymentRepository.findById(offering.getPaymentId()).orElse(null);
-                }
-                return OfferingResponse.from(offering, payment);
-            })
+            .map(op -> OfferingResponse.from(op.offering(), op.payment()))
             .toList();
     }
 
-    private Church requireChurch() {
-        return churchRepository.findAll()
-            .stream()
-            .findFirst()
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debe registrar una iglesia primero"));
-    }
+    // requireChurch moved to OfferingService
 
     public record OfferingRequest(
         @NotNull Long personId,

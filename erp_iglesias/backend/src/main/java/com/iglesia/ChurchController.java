@@ -5,36 +5,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import com.iglesia.service.ChurchService;
 
 @RestController
 @RequestMapping("/api/church")
 public class ChurchController {
-    private final ChurchRepository churchRepository;
+    private final ChurchService churchService;
 
-    public ChurchController(ChurchRepository churchRepository) {
-        this.churchRepository = churchRepository;
+    public ChurchController(ChurchService churchService) {
+        this.churchService = churchService;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ChurchResponse create(@RequestBody ChurchRequest request) {
-        if (churchRepository.count() > 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya existe una iglesia registrada");
-        }
-        Church church = new Church();
-        church.setName(request.name());
-        church.setAddress(request.address());
-        churchRepository.save(church);
+        Church church = churchService.create(request.name(), request.address());
         return ChurchResponse.from(church);
     }
 
     @GetMapping
     public ChurchResponse get() {
-        return churchRepository.findAll()
-            .stream()
-            .findFirst()
-            .map(ChurchResponse::from)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay iglesia registrada"));
+        return ChurchResponse.from(churchService.getChurch());
     }
 
     public record ChurchRequest(
