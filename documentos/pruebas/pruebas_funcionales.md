@@ -21,6 +21,30 @@ Estos servicios encapsulan la lógica de negocio que previamente se encontraba e
 
 ### Controladores refactorizados
 
+````markdown
+# Pruebas funcionales — ADR-001
+
+**Implementación de la capa Service**
+
+## 1. Archivos modificados
+
+Para implementar la arquitectura **Controller → Service → Repository** se añadieron y refactorizaron los siguientes archivos.
+
+### Servicios creados
+
+* `AuthService.java`
+* `ChurchService.java`
+* `CourseService.java`
+* `PersonService.java`
+* `EnrollmentService.java`
+* `OfferingService.java`
+* `PaymentService.java`
+* `UserService.java`
+
+Estos servicios encapsulan la lógica de negocio que previamente se encontraba en los controladores.
+
+### Controladores refactorizados
+
 Los siguientes controladores fueron modificados para delegar la lógica a la nueva capa de servicios:
 
 * `AuthController.java`
@@ -80,7 +104,6 @@ POST /api/auth/login
 * Generación de token JWT
 * Retorno de email y rol del usuario autenticado
 
-📸 **Pantallazo aquí**
 
 ![Login exitoso](../../imagenes/sistema%20mejorado/P1/Autenticación_exitosa.png)
 
@@ -103,7 +126,6 @@ POST /api/users
 * Usuario creado correctamente
 * Validación de email duplicado
 
-📸 **Pantallazo aquí**
 
 ![Login exitoso](../../imagenes/sistema%20mejorado/P1/Creación_usuario.png)
 
@@ -275,5 +297,149 @@ Controller → Service → Repository
 
 ---
 
+# Pruebas funcionales — ADR-004
 
+**Implementación de manejo global de excepciones**
+
+---
+
+# 1. Archivos modificados
+
+Para implementar el manejo global de excepciones se creó un componente centralizado encargado de interceptar errores generados en diferentes capas del sistema.
+
+### Clase creada
+
+* `GlobalExceptionHandler.java`
+
+Esta clase utiliza la anotación:
+
+```
+@RestControllerAdvice
+```
+
+para interceptar excepciones generadas en controladores, servicios o repositorios y convertirlas en respuestas HTTP estructuradas y consistentes.
+
+La estructura estándar de error devuelta por la API es:
+
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Descripción del error",
+  "timestamp": "2026-03-09T10:00:00Z"
+}
+```
+
+### Excepciones manejadas
+
+El `GlobalExceptionHandler` implementa controladores para las siguientes excepciones:
+
+| Excepción                         | Código HTTP                     |
+| --------------------------------- | ------------------------------- |
+| `MethodArgumentNotValidException` | 400 Bad Request                 |
+| `ResponseStatusException`         | Según el status de la excepción |
+| `EntityNotFoundException`         | 404 Not Found                   |
+| `IllegalArgumentException`        | 400 Bad Request                 |
+| `RuntimeException`                | 500 Internal Server Error       |
+
+No se modificaron:
+
+* entidades
+* repositorios
+* rutas de la API
+
+Los controladores y servicios continúan lanzando excepciones normalmente, mientras que el `GlobalExceptionHandler` se encarga de transformarlas en respuestas HTTP consistentes.
+
+---
+
+# 2. Verificación funcional
+
+Para verificar el funcionamiento del manejo global de excepciones se realizaron pruebas manuales utilizando **Postman** contra el backend desarrollado en **Spring Boot** ejecutándose en Docker.
+
+Base URL utilizada:
+
+```
+http://localhost:8080
+```
+
+Las pruebas consistieron en provocar diferentes tipos de errores para confirmar que el sistema responde utilizando el nuevo mecanismo centralizado de manejo de excepciones.
+
+---
+
+# 3. Pruebas realizadas
+
+## 3.1 Error de validación de datos
+
+**Endpoint**
+
+```
+POST /api/auth/login
+```
+
+**Body enviado**
+
+```json
+{
+  "email": "",
+  "password": "Admin123!"
+}
+```
+
+**Resultado esperado**
+
+* El sistema detecta un error de validación debido al campo `email` vacío.
+* El `GlobalExceptionHandler` captura la excepción `MethodArgumentNotValidException`.
+* Se devuelve una respuesta HTTP `400 Bad Request` con detalles del error.
+
+
+![Login exitoso](../../imagenes/sistema%20mejorado/P3/Manejo_error1.png)
+
+**Figura X.** Manejo global de error de validación mediante `GlobalExceptionHandler`.
+
+---
+
+## 3.2 Recurso no encontrado
+
+**Endpoint**
+
+```
+GET /api/church
+```
+
+**Condición**
+
+No existe una iglesia registrada en la base de datos.
+
+**Resultado esperado**
+
+* El sistema lanza una excepción `ResponseStatusException` o `EntityNotFoundException`.
+* El `GlobalExceptionHandler` captura la excepción.
+* Se devuelve una respuesta `404 Not Found` con la estructura de error definida.
+
+
+![Login exitoso](../../imagenes/sistema%20mejorado/P3/Manejo_error2.png)
+
+**Figura X.** Manejo global de error cuando un recurso solicitado no existe.
+
+---
+
+# 4. Resultado
+
+Las pruebas realizadas permiten verificar que:
+
+* Las excepciones generadas en el sistema son capturadas por el `GlobalExceptionHandler`.
+* Todas las respuestas de error siguen una estructura consistente.
+* Se evita duplicar lógica de manejo de errores en los controladores.
+
+Esto mejora la claridad de la API y facilita su consumo por parte de clientes externos.
+
+---
+
+# 5. Conclusión
+
+La implementación del **manejo global de excepciones** permite centralizar el tratamiento de errores dentro del sistema.
+
+Este enfoque mejora la mantenibilidad del código, evita duplicación de lógica en los controladores y garantiza que todas las respuestas de error devueltas por la API tengan un formato uniforme.
+
+---
 
