@@ -21,18 +21,18 @@ public class EnrollmentController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @PostMapping
-    public EnrollmentResponse create(@Valid @RequestBody EnrollmentRequest request) {
+    public ApiResponse<EnrollmentResponse> create(@Valid @RequestBody EnrollmentRequest request) {
         EnrollmentService.EnrollmentWithPayment result = enrollmentService.create(request.personId(), request.courseId());
-        return EnrollmentResponse.from(result.enrollment(), result.payment());
+        return ApiResponse.success("Inscripción creada", EnrollmentResponse.from(result.enrollment(), result.payment()));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @GetMapping
-    public List<EnrollmentResponse> list() {
-        return enrollmentService.list()
+    public ApiResponse<java.util.List<EnrollmentResponse>> list() {
+        return ApiResponse.success("Lista de inscripciones", enrollmentService.list()
             .stream()
             .map(ep -> EnrollmentResponse.from(ep.enrollment(), ep.payment()))
-            .toList();
+            .toList());
     }
 
     // requireChurch moved to EnrollmentService

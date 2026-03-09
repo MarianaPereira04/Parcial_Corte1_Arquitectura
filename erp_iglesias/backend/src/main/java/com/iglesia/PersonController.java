@@ -22,18 +22,18 @@ public class PersonController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @PostMapping
-    public PersonResponse create(@Valid @RequestBody PersonRequest request) {
+    public ApiResponse<PersonResponse> create(@Valid @RequestBody PersonRequest request) {
         Person person = personService.create(request.firstName(), request.lastName(), request.document(), request.phone(), request.email());
-        return PersonResponse.from(person);
+        return ApiResponse.success("Persona creada", PersonResponse.from(person));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @GetMapping
-    public List<PersonResponse> list() {
-        return personService.list()
+    public ApiResponse<java.util.List<PersonResponse>> list() {
+        return ApiResponse.success("Lista de personas", personService.list()
             .stream()
             .map(PersonResponse::from)
-            .toList();
+            .toList());
     }
 
     // requireChurch moved to PersonService

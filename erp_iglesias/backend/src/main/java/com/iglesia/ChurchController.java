@@ -19,14 +19,14 @@ public class ChurchController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ChurchResponse create(@Valid @RequestBody ChurchRequest request) {
+    public ApiResponse<ChurchResponse> create(@Valid @RequestBody ChurchRequest request) {
         Church church = churchService.create(request.name(), request.address());
-        return ChurchResponse.from(church);
+        return ApiResponse.success("Iglesia creada", ChurchResponse.from(church));
     }
 
     @GetMapping
-    public ChurchResponse get() {
-        return ChurchResponse.from(churchService.getChurch());
+    public ApiResponse<ChurchResponse> get() {
+        return ApiResponse.success("Iglesia encontrada", ChurchResponse.from(churchService.getChurch()));
     }
 
     public record ChurchRequest(

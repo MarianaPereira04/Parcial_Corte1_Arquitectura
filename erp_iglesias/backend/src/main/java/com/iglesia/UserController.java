@@ -20,9 +20,9 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public UserResponse createClient(@Valid @RequestBody CreateUserRequest request) {
+    public ApiResponse<UserResponse> createClient(@Valid @RequestBody CreateUserRequest request) {
         AppUser user = userService.createClient(request.email(), request.password());
-        return UserResponse.from(user);
+        return ApiResponse.success("Usuario creado", UserResponse.from(user));
     }
 
     public record CreateUserRequest(

@@ -23,18 +23,18 @@ public class OfferingController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @PostMapping
-    public OfferingResponse create(@Valid @RequestBody OfferingRequest request) {
+    public ApiResponse<OfferingResponse> create(@Valid @RequestBody OfferingRequest request) {
         OfferingService.OfferingWithPayment result = offeringService.create(request.personId(), request.amount(), request.concept());
-        return OfferingResponse.from(result.offering(), result.payment());
+        return ApiResponse.success("Ofrenda creada", OfferingResponse.from(result.offering(), result.payment()));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @GetMapping
-    public List<OfferingResponse> list() {
-        return offeringService.list()
+    public ApiResponse<java.util.List<OfferingResponse>> list() {
+        return ApiResponse.success("Lista de ofrendas", offeringService.list()
             .stream()
             .map(op -> OfferingResponse.from(op.offering(), op.payment()))
-            .toList();
+            .toList());
     }
 
     // requireChurch moved to OfferingService

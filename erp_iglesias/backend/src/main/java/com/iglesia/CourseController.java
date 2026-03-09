@@ -23,18 +23,18 @@ public class CourseController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public CourseResponse create(@Valid @RequestBody CourseRequest request) {
+    public ApiResponse<CourseResponse> create(@Valid @RequestBody CourseRequest request) {
         Course course = courseService.create(request.name(), request.description(), request.price());
-        return CourseResponse.from(course);
+        return ApiResponse.success("Curso creado", CourseResponse.from(course));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @GetMapping
-    public List<CourseResponse> list() {
-        return courseService.list()
+    public ApiResponse<java.util.List<CourseResponse>> list() {
+        return ApiResponse.success("Lista de cursos", courseService.list()
             .stream()
             .map(CourseResponse::from)
-            .toList();
+            .toList());
     }
 
     // requireChurch moved to CourseService

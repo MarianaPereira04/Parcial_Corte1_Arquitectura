@@ -19,30 +19,30 @@ public class PaymentController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @GetMapping
-    public List<PaymentResponse> list(@RequestParam(name = "status", required = false) PaymentStatus status) {
-        List<Payment> payments = paymentService.list(status);
-        return payments.stream().map(PaymentResponse::from).toList();
+    public ApiResponse<java.util.List<PaymentResponse>> list(@RequestParam(name = "status", required = false) PaymentStatus status) {
+        java.util.List<Payment> payments = paymentService.list(status);
+        return ApiResponse.success("Lista de pagos", payments.stream().map(PaymentResponse::from).toList());
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @PostMapping("/{id}/confirm")
-    public PaymentResponse confirm(@PathVariable Long id) {
+    public ApiResponse<PaymentResponse> confirm(@PathVariable Long id) {
         Payment payment = paymentService.confirm(id);
-        return PaymentResponse.from(payment);
+        return ApiResponse.success("Pago confirmado", PaymentResponse.from(payment));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @PostMapping("/{id}/fail")
-    public PaymentResponse fail(@PathVariable Long id) {
+    public ApiResponse<PaymentResponse> fail(@PathVariable Long id) {
         Payment payment = paymentService.fail(id);
-        return PaymentResponse.from(payment);
+        return ApiResponse.success("Pago marcado como fallido", PaymentResponse.from(payment));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @PostMapping("/{id}/retry")
-    public PaymentResponse retry(@PathVariable Long id) {
+    public ApiResponse<PaymentResponse> retry(@PathVariable Long id) {
         Payment payment = paymentService.retry(id);
-        return PaymentResponse.from(payment);
+        return ApiResponse.success("Pago reintentado", PaymentResponse.from(payment));
     }
 
     public record PaymentResponse(

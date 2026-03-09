@@ -539,3 +539,144 @@ Controller → Service → Repository
 
 Este enfoque mejora la claridad de las dependencias entre componentes y promueve un diseño más desacoplado alineado con el principio **Dependency Inversion Principle (DIP)** del modelo SOLID.
 
+---
+
+# Pruebas funcionales — ADR-009
+
+**Implementación de un formato estándar de respuesta para la API (`ApiResponse<T>`)**
+
+---
+
+# 1. Archivos modificados
+
+Para implementar un formato uniforme de respuesta en todos los endpoints de la API se creó un wrapper genérico que encapsula las respuestas exitosas y los mensajes de error.
+
+### Archivo creado
+
+* `ApiResponse.java`
+
+Esta clase define un contenedor genérico para las respuestas de la API con los siguientes campos:
+
+* `status` — indica el estado de la operación (`success` o `error`)
+* `message` — descripción del resultado de la operación
+* `data` — objeto que contiene los datos devueltos por el endpoint
+
+Además, incluye métodos auxiliares para construir respuestas de éxito y error, como:
+
+```
+ApiResponse.success(message, data)
+ApiResponse.error(message)
+```
+
+### Controladores actualizados
+
+Los controladores del sistema fueron refactorizados para utilizar el wrapper `ApiResponse<T>` en sus respuestas HTTP.
+
+Entre ellos:
+
+* `AuthController.java`
+* `ChurchController.java`
+* `CourseController.java`
+* `EnrollmentController.java`
+* `OfferingController.java`
+* `PaymentController.java`
+* `PersonController.java`
+* `UserController.java`
+* `DashboardController.java`
+
+De esta manera, todos los endpoints devuelven respuestas con una estructura uniforme.
+
+### Otros archivos modificados
+
+* `GlobalExceptionHandler.java`
+
+El manejador global de excepciones fue adaptado para devolver errores utilizando el método:
+
+```
+ApiResponse.error(message)
+```
+
+Esto permite que las respuestas de error mantengan la misma estructura que las respuestas exitosas, mientras se conservan los códigos HTTP correspondientes.
+
+---
+
+# 2. Formato de respuesta esperado
+
+A partir de esta implementación, todas las respuestas de la API siguen el mismo formato estructurado.
+
+### Respuesta exitosa
+
+```json
+{
+  "status": "success",
+  "message": "Operación realizada correctamente",
+  "data": { }
+}
+```
+
+El campo `data` contiene el objeto específico que devuelve el endpoint.
+
+### Respuesta de error
+
+```json
+{
+  "status": "error",
+  "message": "Descripción del error",
+  "data": null
+}
+```
+
+Aunque la estructura del cuerpo es uniforme, los códigos HTTP continúan utilizándose para indicar el tipo de resultado de la operación, por ejemplo:
+
+* `200 OK` — operación exitosa
+* `400 Bad Request` — error de validación
+* `404 Not Found` — recurso no encontrado
+* `500 Internal Server Error` — error inesperado del sistema
+
+---
+
+# 3. Verificación funcional
+
+Para verificar el correcto funcionamiento del nuevo formato de respuesta se realizaron pruebas manuales utilizando **Postman** contra el backend ejecutándose en Docker.
+
+Base URL utilizada:
+
+```
+http://localhost:8080
+```
+
+Durante las pruebas se enviaron solicitudes a distintos endpoints del sistema para confirmar que todas las respuestas siguen la nueva estructura definida.
+
+### Endpoints verificados
+
+* `POST /api/auth/login`
+* `POST /api/users`
+* `GET /api/church`
+* `POST /api/courses`
+* `POST /api/people`
+* `POST /api/enrollments`
+* `POST /api/offerings`
+
+En todos los casos se verificó que:
+
+* Las respuestas exitosas devuelven `status: "success"` y contienen información en el campo `data`.
+* Las respuestas generadas por errores o excepciones devuelven `status: "error"` con `data: null`.
+* Los códigos HTTP originales del sistema se mantienen sin modificaciones.
+
+---
+
+# 4. Resultado
+
+Las pruebas realizadas permiten confirmar que todas las respuestas de la API siguen ahora un **formato estandarizado**, lo que facilita el consumo de la API por parte de clientes externos.
+
+Además, el uso de un wrapper común reduce inconsistencias entre endpoints y mejora la claridad de las respuestas del sistema.
+
+---
+
+# 5. Conclusión
+
+La implementación del **Response Wrapper `ApiResponse<T>`** permitió estandarizar el formato de las respuestas de la API.
+
+Esta mejora facilita la integración con aplicaciones cliente, simplifica el manejo de errores y contribuye a mantener una estructura coherente en todas las respuestas del sistema.
+
+

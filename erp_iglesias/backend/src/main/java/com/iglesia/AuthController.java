@@ -18,9 +18,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
+    public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthService.AuthResult result = authService.login(request.email(), request.password());
-        return new LoginResponse(result.token(), result.email(), result.role());
+        return ApiResponse.success("Autenticación exitosa", new LoginResponse(result.token(), result.email(), result.role()));
     }
 
 

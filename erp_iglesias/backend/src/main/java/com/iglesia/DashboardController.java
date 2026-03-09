@@ -33,7 +33,7 @@ public class DashboardController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('CLIENT')")
     @GetMapping
-    public DashboardResponse get() {
+    public ApiResponse<DashboardResponse> get() {
         Church church = churchRepository.findAll()
             .stream()
             .findFirst()
@@ -49,7 +49,7 @@ public class DashboardController {
 
         long pendingPayments = paymentRepository.countByStatus(PaymentStatus.INICIADO);
 
-        return new DashboardResponse(totalPeople, activeCourses, offeringsMonth, pendingPayments);
+        return ApiResponse.success("Dashboard", new DashboardResponse(totalPeople, activeCourses, offeringsMonth, pendingPayments));
     }
 
     public record DashboardResponse(
