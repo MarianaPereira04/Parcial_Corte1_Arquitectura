@@ -443,3 +443,99 @@ Este enfoque mejora la mantenibilidad del código, evita duplicación de lógica
 
 ---
 
+# Pruebas funcionales — ADR-006
+
+**Uso de inyección de dependencias por constructor**
+
+---
+
+# 1. Archivos modificados
+
+Durante el análisis del backend se revisaron los controladores, servicios y componentes del sistema para identificar posibles usos de inyección de dependencias por campo, especialmente mediante la anotación `@Autowired`.
+
+Después de inspeccionar el código fuente del proyecto se verificó que las dependencias ya se encontraban definidas mediante **inyección por constructor**, por lo que **no fue necesario realizar modificaciones en el código existente**.
+
+En consecuencia, no se modificaron archivos del backend.
+
+### Archivos actualizados
+
+* `pruebas_funcionales.md`
+
+Este archivo fue actualizado únicamente para documentar la verificación realizada respecto al cumplimiento del ADR-006.
+
+No se modificaron:
+
+* controladores
+* servicios
+* repositorios
+* entidades
+
+---
+
+# 2. Verificación funcional
+
+Para confirmar el cumplimiento del ADR-006 se realizó una revisión manual del código fuente ubicado en:
+
+```
+backend/src/main/java/com/iglesia/**
+```
+
+El objetivo de esta revisión fue identificar posibles usos de **inyección de dependencias por campo**, por ejemplo:
+
+```java
+@Autowired
+private UserService userService;
+```
+
+Durante el análisis se comprobó que las clases del sistema utilizan el siguiente patrón:
+
+```java
+private final UserService userService;
+
+public UserController(UserService userService) {
+    this.userService = userService;
+}
+```
+
+Este patrón corresponde a la **inyección de dependencias por constructor**, que es la práctica recomendada en aplicaciones Spring Boot.
+
+---
+
+# 3. Pruebas realizadas
+
+En cuanto a las pruebas funcionales, se tomó como referencia la ejecución de los endpoints utilizados en los ADR anteriores, especialmente en el **ADR-004 (manejo global de excepciones)**, donde se realizaron pruebas completas sobre distintos endpoints del sistema.
+
+Durante dichas pruebas se comprobó que los controladores, servicios y repositorios funcionaban correctamente utilizando las dependencias inyectadas mediante constructor.
+
+Los endpoints utilizados para esta verificación fueron:
+
+* `POST /api/auth/login`
+* `POST /api/users`
+* `GET /api/church`
+* `POST /api/courses`
+* `POST /api/people`
+
+El funcionamiento correcto de estos endpoints confirma que la inyección de dependencias mediante constructores ya se encontraba implementada correctamente en el sistema.
+
+---
+
+# 4. Resultado
+
+El análisis del código permitió verificar que el sistema **ya utilizaba inyección de dependencias por constructor antes de aplicar el ADR-006**, y que dicha implementación funcionaba correctamente durante las pruebas realizadas en los ADR anteriores.
+
+Por lo tanto, no fue necesario realizar refactorizaciones adicionales en el backend.
+
+---
+
+# 5. Conclusión
+
+El ADR-006 se considera **implementado y verificado**, ya que el proyecto ya utilizaba inyección de dependencias por constructor en sus componentes principales.
+
+Las pruebas realizadas en los ADR anteriores confirmaron que esta forma de inyección funciona correctamente dentro de la arquitectura:
+
+```
+Controller → Service → Repository
+```
+
+Este enfoque mejora la claridad de las dependencias entre componentes y promueve un diseño más desacoplado alineado con el principio **Dependency Inversion Principle (DIP)** del modelo SOLID.
+
