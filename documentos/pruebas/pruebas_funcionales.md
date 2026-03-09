@@ -70,8 +70,8 @@ POST /api/auth/login
 
 ```json
 {
-  "email": "dm@gmail.com",
-  "password": "danay123"
+  "email": "admin@parroquia.com",
+  "password": "Admin123!"
 }
 ```
 
@@ -83,7 +83,7 @@ POST /api/auth/login
 
 📸 **Pantallazo aquí**
 
-![Login exitoso](../../imagenes/sistema%20mejorado/P1/Autenticación_exitoza.png)
+![Login exitoso](../../imagenes/sistema%20mejorado/P1/Autenticación_exitosa.png)
 
 **Figura 1.** Autenticación exitosa mediante el endpoint `/api/auth/login`.
 
